@@ -1,13 +1,13 @@
 {
   "domain": "growatt_server",
   "name": "Growatt Server Upstream",
-  "codeowners": ["@johanzander"],
+  "codeowners": ["@royeiror"],
   "config_flow": true,
-  "documentation": "https://github.com/johanzander/growatt_server_upstream",
+  "documentation": "https://github.com/royeiror/growatt_server_upstream",
   "integration_type": "hub",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/johanzander/growatt_server_upstream/issues",
+  "issue_tracker": "https://github.com/royeiror/growatt_server_upstream/issues",
   "loggers": ["growattServer"],
   "requirements": ["growattServer==1.9.0"],
-  "version": "2.5.0"
+  "version": "2.5.1"
 }

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.1] - 2026-11-09
+
+### Fixed
+- Devices listed twice under the same serial now produce exactly one device
+  coordinator. The Growatt Classic API can return a single physical unit as both
+  `storage` and `inverter` (observed on an SPF-10000T-DVM-MPV, serial
+  `KTH1BLB007`). Because `device_coordinators` is keyed by `deviceSn`, the second
+  entry silently overwrote the first, so the integration polled
+  `inverter_detail` (all zeros) and never called `storage_params` /
+  `storage_energy_overview`. Result: an inverter device full of zeros and no
+  battery entities. New `dedupe_devices()` keeps one device per serial and
+  prefers the device type that carries real telemetry (`storage`, `sph`, `mix`,
+  `tlx`, `min`) over the generic `inverter` entry.
+- Replaces the inline supported-device-type list duplicated in both setup paths
+  with the `SUPPORTED_DEVICE_TYPES` constant.
+
 ## [2.4.2] - 2026-03-03
 
 ### Fixed

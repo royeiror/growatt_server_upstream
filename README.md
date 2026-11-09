@@ -5,6 +5,22 @@
 
 Upstream development version of the Growatt Server integration for Home Assistant.
 
+## This fork
+
+This is a fork of [johanzander/growatt_server_upstream][upstream-repo], maintained
+for personal use. It adds one fix on top of upstream:
+
+**Duplicate serial handling.** The Growatt Classic API can list a single physical
+unit twice under the same serial — typically a live `storage` entry plus a stale
+`inverter` entry that only reports zeros (seen on an SPF-10000T-DVM-MPV). Because
+device coordinators are keyed by serial, the inverter entry used to overwrite the
+storage entry, so Home Assistant showed an inverter device full of zeros and
+**no battery entities at all**. `dedupe_devices()` now keeps one device per serial
+and prefers the device type that carries the real telemetry, so storage/battery
+sensors are created as intended.
+
+See [CHANGELOG.md](CHANGELOG.md) for details.
+
 ## About
 
 This repository serves as an **upstream testing ground** for improvements to the Growatt Server integration before they are submitted to Home Assistant Core. From version 1.5.0 it should be compatible with the [Growatt BESS (Battery Energy Storage System) Manager][bess].
@@ -22,7 +38,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 1. Open HACS in Home Assistant
 2. Go to "Integrations"
 3. Click the 3-dot menu → "Custom repositories"
-4. Add repository URL: `https://github.com/johanzander/growatt_server_upstream`
+4. Add repository URL: `https://github.com/royeiror/growatt_server_upstream`
 5. Select category: "Integration"
 6. Click "Add"
 
@@ -107,7 +123,8 @@ After removing the stale entry, try adding the integration again.
 
 [hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg
 [hacs]: https://github.com/hacs/integration
-[issues]: https://github.com/johanzander/growatt_server_upstream/issues
-[releases-shield]: https://img.shields.io/github/release/johanzander/growatt_server_upstream.svg
-[releases]: https://github.com/johanzander/growatt_server_upstream/releases
+[issues]: https://github.com/royeiror/growatt_server_upstream/issues
+[releases-shield]: https://img.shields.io/github/release/royeiror/growatt_server_upstream.svg
+[releases]: https://github.com/royeiror/growatt_server_upstream/releases
 [bess]: https://github.com/johanzander/bess-manager
+[upstream-repo]: https://github.com/johanzander/growatt_server_upstream
