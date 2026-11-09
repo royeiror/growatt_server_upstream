@@ -8,16 +8,25 @@ Upstream development version of the Growatt Server integration for Home Assistan
 ## This fork
 
 This is a fork of [johanzander/growatt_server_upstream][upstream-repo], maintained
-for personal use. It adds one fix on top of upstream:
+for personal use. It adds the following fixes on top of upstream:
 
-**Duplicate serial handling.** The Growatt Classic API can list a single physical
-unit twice under the same serial — typically a live `storage` entry plus a stale
-`inverter` entry that only reports zeros (seen on an SPF-10000T-DVM-MPV). Because
-device coordinators are keyed by serial, the inverter entry used to overwrite the
-storage entry, so Home Assistant showed an inverter device full of zeros and
-**no battery entities at all**. `dedupe_devices()` now keeps one device per serial
-and prefers the device type that carries the real telemetry, so storage/battery
-sensors are created as intended.
+**Duplicate serial handling (2.5.1).** The Growatt Classic API can list a single
+physical unit twice under the same serial — typically a live `storage` entry plus
+a stale `inverter` entry that only reports zeros (seen on an SPF-10000T-DVM-MPV).
+Because device coordinators are keyed by serial, the inverter entry used to
+overwrite the storage entry, so Home Assistant showed an inverter device full of
+zeros and **no battery entities at all**. `dedupe_devices()` now keeps one device
+per serial and prefers the device type that carries the real telemetry.
+
+**Storage sensor corrections (2.5.2).**
+- Added a signed `Battery power` sensor (`pBat`) — negative charging, positive
+  discharging. Discharge power had no entity before.
+- Fixed swapped AC frequency mappings and three mislabeled current sensors.
+- `Load percentage` no longer claims to be a battery device class.
+- Disabled the two lifetime energy sensors by default; Growatt returns negative
+  lifetime counters for some devices, which breaks the Energy Dashboard.
+- Plant `Maximum power` now uses the storage device's rating instead of the
+  bogus `nominalPower` value (24576000 W on an SPF-10000T-DVM-MPV).
 
 See [CHANGELOG.md](CHANGELOG.md) for details.
 

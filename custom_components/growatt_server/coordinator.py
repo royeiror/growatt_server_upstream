@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import json
 import logging
+import math
 import time
 from typing import TYPE_CHECKING, Any
 
@@ -34,6 +35,36 @@ type GrowattConfigEntry = ConfigEntry[GrowattRuntimeData]
 SCAN_INTERVAL = datetime.timedelta(minutes=5)
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _as_float(value: Any) -> float | None:
+    """Return value as a finite float, or None when it is not a number."""
+    try:
+        result = float(value)
+    except (TypeError, ValueError):
+        return None
+    return result if math.isfinite(result) else None
+
+
+def _plausible_nominal_power(plant_info: dict[str, Any]) -> float | None:
+    """Return a trustworthy plant nominal power in watts, if one exists.
+
+    plant_info.nominalPower is unusable for some devices: an SPF-10000T-DVM-MPV
+    reports 24576000 W (24.58 MW) while the same payload's storageList reports
+    the correct 10000 VA. nominal_Power is a different, equally wrong value
+    (3360). The storage device's own rating is the only reliable source, so
+    prefer it and only fall back to the plant fields when they look sane.
+    """
+    for storage in plant_info.get("storageList") or []:
+        rated = _as_float(storage.get("apparentPower"))
+        if rated is not None and rated > 0:
+            return rated
+
+    nominal = _as_float(plant_info.get("nominalPower"))
+    if nominal is not None and 0 < nominal <= 1_000_000:
+        return nominal
+
+    return _as_float(plant_info.get("nominal_Power"))
 
 
 class GrowattCoordinator(DataUpdateCoordinator[dict[str, Any]]):
@@ -120,6 +151,11 @@ class GrowattCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 plant_money_text, currency = total_info["plantMoneyText"].split("/")
                 total_info["plantMoneyText"] = plant_money_text
                 total_info["currency"] = currency
+
+                # plant_info.nominalPower is wrong for some devices; prefer the
+                # storage device's own rating when one is present.
+                if (nominal_power := _plausible_nominal_power(total_info)) is not None:
+                    total_info["nominalPower"] = nominal_power
             _LOGGER.debug("Total info for plant %s: %r", self.plant_id, total_info)
             self.data = total_info
         elif self.device_type == "inverter":

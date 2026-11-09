@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.2] - 2026-11-09
+
+### Added
+- `storage_battery_power` sensor, mapped to `pBat`. Signed: negative while
+  charging, positive while discharging. `pCharge` and `pDischarge` are
+  unidirectional, so neither could report both states, and there was previously
+  no entity at all for battery discharge power.
+
+### Fixed
+- Swapped AC frequency mappings. `storage_ac_input_frequency_out` ("AC input
+  frequency") read `freqOutPut` — the inverter's *output* frequency — while
+  `storage_ac_output_frequency` read `freqGrid`, the *grid input* frequency.
+  On an off-grid SPF this showed "AC input frequency 50 Hz" and "AC output
+  frequency 0 Hz", i.e. exactly backwards.
+- Corrected three mislabeled current sensors to match the field they read:
+  "Solar charge current" (`iAcCharge`) → "AC charge current",
+  "Grid charge current" (`chgCurr`) → "Battery charge current",
+  "Grid out current" (`outPutCurrent`) → "Output current".
+- `storage_load_percentage` no longer declares `device_class: battery`; it is
+  inverter load percentage, not battery state.
+- `storage_charge_storage_lifetime` (`eChargeTotal`) and
+  `storage_solar_output_lifetime` (`epvTotal`) are now disabled by default.
+  Growatt returns negative lifetime counters for some devices (-1425.5 and
+  -1448.7 kWh on an SPF-10000T-DVM-MPV), and a negative `TOTAL` sensor breaks
+  the Energy Dashboard.
+- Plant "Maximum power" no longer reports 24576000 W. `plant_info.nominalPower`
+  is unusable for some devices, so the storage device's `apparentPower` rating
+  is preferred, with `nominalPower` / `nominal_Power` only used as a fallback
+  when plausible.
+
 ## [2.5.1] - 2026-11-09
 
 ### Fixed

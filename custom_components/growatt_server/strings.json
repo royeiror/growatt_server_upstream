@@ -233,6 +233,9 @@
       "storage_battery_percentage": {
         "name": "Battery percentage"
       },
+      "storage_battery_power": {
+        "name": "Battery power (negative = charging)"
+      },
       "storage_battery_voltage": {
         "name": "Battery voltage"
       },
@@ -249,10 +252,10 @@
         "name": "PV2 current to storage"
       },
       "storage_current_pv": {
-        "name": "Solar charge current"
+        "name": "AC charge current"
       },
       "storage_grid_amperage_input": {
-        "name": "Grid charge current"
+        "name": "Battery charge current"
       },
       "storage_grid_charged_lifetime": {
         "name": "Lifetime grid charged"
@@ -267,7 +270,7 @@
         "name": "Grid discharged today"
       },
       "storage_grid_out_current": {
-        "name": "Grid out current"
+        "name": "Output current"
       },
       "storage_grid_voltage": {
         "name": "AC input voltage"

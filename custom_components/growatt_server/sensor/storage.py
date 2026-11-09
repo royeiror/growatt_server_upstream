@@ -79,6 +79,10 @@ STORAGE_SENSOR_TYPES: tuple[GrowattSensorEntityDescription, ...] = (
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL,
     ),
+    # eChargeTotal / epvTotal come back negative from Growatt for some devices
+    # (e.g. an SPF-10000T-DVM-MPV reports -1425.5 and -1448.7 kWh). A negative
+    # lifetime total poisons the Energy Dashboard, so keep the entity available
+    # for debugging but disabled by default.
     GrowattSensorEntityDescription(
         key="storage_charge_storage_lifetime",
         translation_key="storage_charge_storage_lifetime",
@@ -86,6 +90,7 @@ STORAGE_SENSOR_TYPES: tuple[GrowattSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL,
+        entity_registry_enabled_default=False,
     ),
     GrowattSensorEntityDescription(
         key="storage_solar_output_today",
@@ -102,6 +107,7 @@ STORAGE_SENSOR_TYPES: tuple[GrowattSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL,
+        entity_registry_enabled_default=False,
     ),
     GrowattSensorEntityDescription(
         key="storage_solar_production",
@@ -131,6 +137,16 @@ STORAGE_SENSOR_TYPES: tuple[GrowattSensorEntityDescription, ...] = (
         key="storage_power_flow",
         translation_key="storage_power_flow",
         api_key="pCharge",
+        native_unit_of_measurement=UnitOfPower.WATT,
+        device_class=SensorDeviceClass.POWER,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    # Signed battery power: negative while charging, positive while discharging.
+    # pCharge/pDischarge are unidirectional, so neither can express both states.
+    GrowattSensorEntityDescription(
+        key="storage_battery_power",
+        translation_key="storage_battery_power",
+        api_key="pBat",
         native_unit_of_measurement=UnitOfPower.WATT,
         device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
@@ -212,7 +228,7 @@ STORAGE_SENSOR_TYPES: tuple[GrowattSensorEntityDescription, ...] = (
     GrowattSensorEntityDescription(
         key="storage_ac_input_frequency_out",
         translation_key="storage_ac_input_frequency_out",
-        api_key="freqOutPut",
+        api_key="freqGrid",
         native_unit_of_measurement=UnitOfFrequency.HERTZ,
         device_class=SensorDeviceClass.FREQUENCY,
         state_class=SensorStateClass.MEASUREMENT,
@@ -230,7 +246,7 @@ STORAGE_SENSOR_TYPES: tuple[GrowattSensorEntityDescription, ...] = (
     GrowattSensorEntityDescription(
         key="storage_ac_output_frequency",
         translation_key="storage_ac_output_frequency",
-        api_key="freqGrid",
+        api_key="freqOutPut",
         native_unit_of_measurement=UnitOfFrequency.HERTZ,
         device_class=SensorDeviceClass.FREQUENCY,
         state_class=SensorStateClass.MEASUREMENT,
@@ -295,7 +311,6 @@ STORAGE_SENSOR_TYPES: tuple[GrowattSensorEntityDescription, ...] = (
         translation_key="storage_load_percentage",
         api_key="loadPercent",
         native_unit_of_measurement=PERCENTAGE,
-        device_class=SensorDeviceClass.BATTERY,
         state_class=SensorStateClass.MEASUREMENT,
         precision=2,
     ),
